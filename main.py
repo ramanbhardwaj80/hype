@@ -1,3 +1,15 @@
+# --- FIX 1: Force pysqlite3 for ChromaDB on Railway ---
+# This must be at the very top, before any other imports!
+import sys
+import os
+
+try:
+    __import__('pysqlite3')
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+except ImportError:
+    pass # Fallback to standard sqlite3 if locally (optional)
+
+# --- Standard Imports ---
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
@@ -56,4 +68,7 @@ def chat_endpoint(request: QueryRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    # --- FIX 2: Dynamic Port & Host for Cloud Deployment ---
+    port = int(os.environ.get("PORT", 8000))
+    # Host must be 0.0.0.0 for Railway, not 127.0.0.1
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
