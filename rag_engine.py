@@ -9,6 +9,9 @@ from langchain_core.messages import HumanMessage
 from dotenv import load_dotenv
 
 load_dotenv()
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 class EmbeddingManager:
     def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
@@ -93,4 +96,5 @@ class CivicAssistRAG:
         return {
             "answer": response.content,
             "sources": [m.get('source_file', 'unknown') for m in metadatas]
+
         }
